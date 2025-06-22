@@ -1,3 +1,10 @@
-title: Sujin Jin's Academic Page
-email: sujin@email.com
-...
+remote_theme: alshedivat/al-folio
+plugins:
+  - jekyll-remote-theme
+
+title: Sujin Jin's Website
+email: kane0113@skku.edu
+description: >-
+  Graduate student in Civil Engineering at Sungkyunkwan University
+baseurl: ""
+url: "https://sujin1229.github.io"
