@@ -4,6 +4,7 @@ title: "Welcome"
 subtitle: "Graduate Student in Civil Engineering | AI for Infrastructure • Computer Vision • SHM"
 ---
 
+
 Hi! 👋 I'm **Sujin Jin**, a first-year graduate student in **Civil Engineering** at **[Sungkyunkwan University](https://www.skku.edu)**.  
 I am currently conducting research at the [SCIT Lab (Smart Computing for Infrastructure Technology)](https://sites.google.com/view/skkuscit), where we explore the convergence of AI and civil infrastructure systems.
 
