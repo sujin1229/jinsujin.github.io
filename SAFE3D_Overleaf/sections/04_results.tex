@@ -1,0 +1,148 @@
+\section{Results}
+\label{sec:results}
+
+\subsection{Experimental Design and Datasets}
+SAFE-3D was evaluated on four complementary datasets to separate component-level validation from end-to-end field evaluation. Dataset A comprised four CCTV cameras in a controlled indoor environment and was used for detection, localization consistency, component ablation, and cross-camera association. Dataset B combined UAV imagery, three fixed CCTV cameras, and total-station measurements in an outdoor controlled environment and was used for CCTV-to-map registration, metric localization validation, proximity analysis, and outdoor association. Dataset C was collected at an operating construction site using a UAV-derived site map and three CCTV cameras and was used to evaluate worker and equipment association and site-coordinate trajectory reconstruction. Dataset D contained three CCTV cameras at a separate construction site without a UAV map and was used only as an auxiliary geometry-controlled evaluation of the association module and its sensitivity to missed detections. Dataset D was not treated as an end-to-end validation of the UAV-referenced pipeline.
+
+The manually annotated evaluation subset of Dataset C contained 10 worker identities and seven equipment identities. Dataset A contained two worker identities and was intended to isolate method differences rather than establish statistical generalization. Dataset B involved three workers. Dataset D consisted of two short independent sessions. Camera layout, frame counts, synchronization, and annotation procedures should be reported in the Appendix once the final acquisition log is confirmed.
+
+\begin{table}[t]
+\centering
+\caption{Role of the four evaluation datasets.}
+\label{tab:datasets}
+\begin{tabular}{p{0.8cm}p{3.4cm}p{3.6cm}}
+\toprule
+Set & Environment and configuration & Primary purpose \\
+\midrule
+A & Controlled indoor, four CCTV cameras & Detection, localization, ablation, association \\
+B & Controlled outdoor, UAV + three CCTV cameras & Registration, metric validation, proximity, association \\
+C & Operating site, UAV + three CCTV cameras & Field association and trajectory reconstruction \\
+D & Separate site, three CCTV cameras & Auxiliary association and recall sensitivity \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Object Detection Performance}
+Detection was evaluated as the upstream observation source for localization and association rather than as the main methodological contribution. Datasets A and B used a COCO-pretrained YOLO11 detector with the person class retained. Datasets C and D used a detector retrained for worker and construction-equipment classes because of the domain gap associated with small distant objects, partial occlusion, and construction-specific machinery.
+
+Dataset A achieved an overall precision of 0.945, recall of 0.937, F1 score of 0.941, mAP@0.5 of 0.944, and mAP@0.5:0.95 of 0.936. Dataset B achieved an overall precision of 0.977, recall of 0.956, F1 score of 0.966, mAP@0.5 of 0.990, and mAP@0.5:0.95 of 0.740. The lower high-IoU mAP in Dataset B reflects outdoor scale variation despite stable person detection.
+
+On Dataset C, the field-trained detector achieved an overall precision of 0.899, recall of 0.793, F1 score of 0.842, mAP@0.5 of 0.870, and mAP@0.5:0.95 of 0.592. Worker and equipment mAP@0.5 values were 0.852 and 0.889, respectively. Dataset D achieved an overall precision of 0.838, recall of 0.787, F1 score of 0.811, mAP@0.5 of 0.818, and mAP@0.5:0.95 of 0.497. Worker and equipment mAP@0.5 values were 0.871 and 0.765. The controlled-to-field performance gap reflects the visual complexity of real sites and explains why long-distance false negatives and partial occlusion remain major sources of trajectory interruption.
+
+\begin{table*}[t]
+\centering
+\caption{Object detection performance across datasets.}
+\label{tab:detection}
+\begin{tabular}{llccccc}
+\toprule
+Dataset & Class & Precision & Recall & F1 & mAP@0.5 & mAP@0.5:0.95 \\
+\midrule
+A & Worker & 0.945 & 0.937 & 0.941 & 0.944 & 0.936 \\
+B & Worker & 0.977 & 0.956 & 0.966 & 0.990 & 0.740 \\
+C & Worker & 0.902 & 0.737 & 0.811 & 0.852 & 0.583 \\
+C & Equipment & 0.895 & 0.849 & 0.871 & 0.889 & 0.600 \\
+D & Worker & 0.884 & 0.842 & 0.862 & 0.871 & 0.563 \\
+D & Equipment & 0.792 & 0.731 & 0.760 & 0.765 & 0.431 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Metric 3D Localization}
+\subsubsection{Multi-View Consistency and Total-Station Validation}
+Dataset A evaluated internal cross-view consistency. For synchronized observations of the same worker, the distance from each camera-specific 3D estimate to the cross-view centroid had a median of 12.2 cm, an RMSE of 17.7 cm, and a 90th percentile of 29.4 cm. The median cross-view reprojection error was 12.9 pixels. Metric scale was independently checked using four measured ArUco-marker separations spanning approximately 2--6 m, and reconstructed distances remained within \(\pm3\%\). The exact marker IDs, measurement instrument, and pairwise values should be listed in the Appendix.
+
+Dataset B provided external validation. The three CCTV cameras were registered to the UAV-derived site map with reprojection errors of 4.2--4.8 pixels and a mean of 4.6 pixels. Ten total-station-measured worker ground locations were used to evaluate the 3D localization pipeline. A similarity transform estimated and evaluated on all ten points produced an in-sample RMS residual of 0.776 m, which characterizes alignment fit rather than independent localization accuracy. In leave-one-out validation, the transform was estimated from nine points and evaluated on the excluded point, yielding an RMS error of 1.270 m. This leave-one-out value is used as the primary external localization metric. Camera-to-centroid consistency in Dataset B had a median of 21.5 cm and an RMSE of 33.8 cm, reflecting the increased viewing distances and outdoor geometry.
+
+\begin{table}[t]
+\centering
+\caption{Metric localization validation.}
+\label{tab:localization}
+\begin{tabular}{p{4.4cm}p{2.4cm}}
+\toprule
+Metric & Result \\
+\midrule
+Dataset A camera-to-centroid median / RMSE / P90 & 12.2 / 17.7 / 29.4 cm \\
+Dataset A cross-view reprojection median & 12.9 px \\
+Dataset A metric-scale error & within \(\pm3\%\) \\
+Dataset B CCTV-to-map reprojection & 4.2--4.8 px (mean 4.6) \\
+Dataset B ten-point in-sample residual & 0.776 m \\
+Dataset B leave-one-out RMS error & 1.270 m \\
+Dataset B camera-to-centroid median / RMSE & 21.5 / 33.8 cm \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Dataset C was collected during ongoing site operations. Installing and repeatedly surveying total-station targets throughout active work zones was not feasible without interfering with construction activities. Dataset C was therefore evaluated through cross-camera identity consistency and trajectory continuity rather than independent point-wise absolute localization. Dataset D used a ground-plane mapping and was excluded from metric 3D localization evaluation.
+
+\subsubsection{Localization Ablation}
+Ablation was conducted on 1,132 matched observations in Dataset A. The box-center configuration produced a median reprojection error of 53.0 pixels and pairwise consistency error of 40.5 cm. Moving the anchor to the raw box bottom-center reduced these values to 49.5 pixels and 35.5 cm. The proposed GCA further reduced them to 30.6 pixels and 24.7 cm. Adding metric depth-scale correction reduced the errors to 16.9 pixels and 16.3 cm. Finally, covariance-aware fusion reduced fused-estimate reprojection error to 12.9 pixels. Pairwise consistency remained 16.3 cm because it was computed from camera-specific observations before fusion.
+
+\begin{table}[t]
+\centering
+\caption{Localization ablation on Dataset A.}
+\label{tab:ablation}
+\begin{tabular}{lcccc}
+\toprule
+Variant & Anchor & Scale & Fusion & Reproj. / Consist. \\
+\midrule
+V1 & Box center & No & No & 53.0 px / 40.5 cm \\
+V2 & Bottom-center & No & No & 49.5 px / 35.5 cm \\
+V3 & GCA & No & No & 30.6 px / 24.7 cm \\
+V4 & GCA & Yes & No & 16.9 px / 16.3 cm \\
+SAFE-3D & GCA & Yes & Yes & 12.9 px / 16.3 cm \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Cross-Camera Global Association}
+The association evaluation examined whether covariance-normalized matching could outperform fixed-distance alternatives while using the same detections, timestamps, classes, and spatial observations. No-association evaluation on Dataset A produced an IDF1 of 0.263 because each camera retained independent local identities. Fixed-radius 3D nearest matching and Euclidean--Hungarian assignment achieved IDF1 values of 0.424 and 0.473, respectively. The latest SAFE-3D configuration achieved an IDF1 of 0.845 and a HOTA score of 0.807 without scene-specific Euclidean distance threshold tuning. A GT-tuned Euclidean reference achieved an IDF1 of 0.982, but this value is treated only as an oracle upper reference because its optimal radius was selected using the evaluation identities.
+
+The practical advantage of SAFE-3D is not the absence of all parameters. Rather, the same statistical confidence level and system parameters are shared across datasets, whereas a fixed Euclidean radius changes with camera layout, object distance distribution, and density. The radius sensitivity analysis should therefore be presented as evidence of site-specific threshold dependence rather than as a claim of parameter-free operation.
+
+The motion-gated re-linking stage was introduced to recover identities after longer observation gaps. Older gate-only values and draft re-linking values were removed from the principal comparison to avoid mixing configurations. The principal manuscript reports the latest complete SAFE-3D run. Any additional IDSW, Pair-F1, or reconstructed-ID values should be inserted only when they are confirmed to originate from that same run.
+
+Dataset C yielded IDF1 scores of 0.67 for workers and 0.76 for equipment. The higher equipment score is consistent with larger image extent, more stable detections, and slower motion. The evaluation subset produced 13 reconstructed worker identities for 10 GT identities and six reconstructed equipment identities for seven GT identities. Worker over-fragmentation was concentrated around long occlusions; the missing equipment identity should be attributed to a confirmed log-based failure mode before final submission rather than to an unverified explanation.
+
+Dataset D is retained as an auxiliary experiment that isolates association from UAV reconstruction and CCTV-to-map registration errors. Its ground mapping was established from GT correspondences, so its result should be interpreted as association behavior under a controlled alternative geometry rather than as evidence that the full SAFE-3D pipeline is independent of UAV mapping. The measured overall cross-camera Pair-F1 across the two sessions was 0.452, compared with 0.315 for a frame-wise greedy baseline and 0.504 for the GT-box geometric upper reference.
+
+\begin{table}[t]
+\centering
+\caption{Confirmed association results used in the principal manuscript.}
+\label{tab:association}
+\begin{tabular}{p{3.9cm}cc}
+\toprule
+Method / target & IDF1 & HOTA \\
+\midrule
+Dataset A: no association & 0.263 & -- \\
+Dataset A: fixed-radius 3D nearest & 0.424 & -- \\
+Dataset A: Euclidean--Hungarian & 0.473 & -- \\
+Dataset A: SAFE-3D, latest run & 0.845 & 0.807 \\
+Dataset A: GT-tuned Euclidean oracle & 0.982 & -- \\
+Dataset C: workers & 0.67 & -- \\
+Dataset C: equipment & 0.76 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{End-to-End Pipeline and Safety-Relevant Outputs}
+Dataset B demonstrated the complete UAV--CCTV geometry pipeline. Eighty sampled UAV images were used for dense reconstruction with sparse SfM poses, three CCTV cameras were registered to the map, and reconstructed detections were expressed in the same metric site frame. The use of 80 sampled images should be described as a computationally constrained subset selected from the full UAV acquisition; the final Appendix should report the total acquired image count and sampling rule. The pipeline achieved 80.9\% trajectory coverage in the evaluated interval.
+
+Dataset C demonstrated field trajectory reconstruction for workers and equipment on the UAV/BEV site map. This result extends camera-specific detections to global site-coordinate trajectories, but the manuscript should avoid claiming absolute field localization accuracy because no independent total-station validation was available in this operating-site dataset.
+
+For Dataset B, 2,651 synchronized worker pairs were analyzed. The median estimated separation between representative ground-contact anchors was 2.12 m. The minimum draft value of 0.11 m was removed from the principal text because the anchor-to-anchor estimate should not be interpreted as physical clearance between object boundaries and because threshold-near events require uncertainty-aware interpretation.
+
+Image-plane distance was evaluated against proximity labels derived from metric 3D trajectories. Pixel-distance AUC was 0.770 for Camera 1 and 0.629 for Camera 3, with best F1 scores of 0.724 and 0.677. In Camera 1, 24.6\% of pairs judged close in image space were outside the corresponding 3D proximity threshold. The previous 3D AUC row was removed; the 3D distance provides the reference spatial relation in this comparison rather than a competing classifier.
+
+\begin{table}[t]
+\centering
+\caption{Camera dependence of 2D proximity cues relative to metric 3D proximity labels.}
+\label{tab:proximity}
+\begin{tabular}{lccc}
+\toprule
+Camera & AUC & Best F1 & False-close rate \\
+\midrule
+Camera 1 & 0.770 & 0.724 & 24.6\% \\
+Camera 3 & 0.629 & 0.677 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
