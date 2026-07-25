@@ -1,0 +1,69 @@
+\section{Methodology}
+\label{sec:method}
+
+\subsection{Framework Overview}
+SAFE-3D comprises an offline geometry stage and an online tracking stage. The offline stage reconstructs a UAV site map, aligns it to a metric world frame, and registers each fixed CCTV camera to the map. The online stage detects workers and equipment, extracts a representative ground-contact anchor, lifts each observation into metric 3D, estimates its anisotropic covariance, and associates observations with predicted global tracks. Multi-view observations assigned to the same track are fused before Kalman updating. A motion-gated tracklet re-linking stage recovers identity continuity after longer observation gaps.
+
+\subsection{UAV Site Reconstruction and Metric Alignment}
+UAV imagery is reconstructed using sparse structure-from-motion camera poses and a dense reconstruction model. Let the reconstruction coordinate system be $\mathcal{M}$ and the metric site frame be $\mathcal{W}$. A similarity transformation is estimated from metric control correspondences:
+\begin{equation}
+(s_g,\mathbf{R}_g,\mathbf{t}_g)=\arg\min_{s,\mathbf{R},\mathbf{t}}\sum_i\left\|\bar{\mathbf{X}}_i^{W}-(s\mathbf{R}\bar{\mathbf{X}}_i^{M}+\mathbf{t})\right\|_2^2.
+\end{equation}
+The transformation is applied consistently to UAV camera poses, sparse and dense points, and depth-derived geometry. The resulting map provides a common metric frame, reference UAV views for CCTV registration, and a pixel-to-3D lookup from reference imagery to map points.
+
+\subsection{CCTV-to-Map Registration}
+The intrinsic matrix $\mathbf{K}_c$ of each CCTV camera $c$ is obtained through calibration and lens distortion is removed. Dense correspondences are extracted between a CCTV reference frame and overlapping UAV reference images. A UAV reference pixel is mapped to its 3D site point, producing 2D--3D correspondences $\{(\mathbf{x}_{i}^{c},\mathbf{X}_{i}^{W})\}$. Camera extrinsics are initialized with PnP-RANSAC and refined by robust reprojection minimization:
+\begin{equation}
+(\mathbf{R}_c,\mathbf{t}_c)=\arg\min_{\mathbf{R},\mathbf{t}}\sum_{i\in\mathcal{I}_c}\rho\!\left(\left\|\pi\!\left(\mathbf{K}_c(\mathbf{R}\mathbf{X}_i^W+\mathbf{t})\right)-\mathbf{x}_i^c\right\|_2\right).
+\end{equation}
+Registration quality is checked using the inlier count, inlier ratio, median reprojection error, and positive-depth consistency.
+
+\subsection{Detection and Ground-Contact Anchor}
+Workers and equipment are detected independently in each camera. Association is permitted only within the same object class. For a bounding box $b=(x_1,y_1,x_2,y_2)$, SAFE-3D defines a representative ground-contact anchor (GCA)
+\begin{equation}
+u_g=\frac{x_1+x_2}{2},\qquad v_g=y_1+\alpha_g(y_2-y_1),
+\end{equation}
+where $\alpha_g$ is fixed across datasets. The GCA is not claimed to be a direct foot or tire-contact detector; it is a stabilized image anchor intended to represent the object's ground location more consistently than the box center or raw bottom-center.
+
+\subsection{Depth-Scale Correction and 2D-to-3D Lifting}
+Relative depth $D_c(\mathbf{x})$ is converted to metric camera depth through a camera-specific scale estimated from CCTV--map correspondences. For valid correspondence samples,
+\begin{equation}
+s_c=\arg\min_s\sum_j\rho\left(z_{j}^{\mathrm{map}}-sD_c(\mathbf{x}_j)\right)^2.
+\end{equation}
+The metric depth at the GCA is $z_g=s_cD_c(\mathbf{a})$. The camera-frame point is
+\begin{equation}
+\mathbf{X}^{c}=z_g\mathbf{K}_c^{-1}[u_g,v_g,1]^\top,
+\end{equation}
+and the world-frame observation is obtained using the inverse camera extrinsic transform.
+
+\subsection{Observation Uncertainty}
+Depth error is generally larger along the viewing ray than perpendicular to it and increases with object distance. SAFE-3D therefore assigns each observation an anisotropic covariance in the camera frame, with a larger variance along the ray direction. The covariance is rotated into the world frame and augmented with terms representing anchor instability and camera registration uncertainty. This covariance is a geometry-informed uncertainty approximation used for relative weighting and compatibility testing; it is not presented as a fully calibrated probabilistic guarantee.
+
+\subsection{Uncertainty-Aware Global Association and Fusion}
+Each global track follows a constant-velocity Kalman model. For predicted track $k$ and observation $i$, the innovation and combined covariance are
+\begin{equation}
+\mathbf{r}_{ki}=\mathbf{z}_i-\mathbf{H}\hat{\mathbf{x}}_k^{-},\qquad
+\mathbf{S}_{ki}=\mathbf{H}\mathbf{P}_k^{-}\mathbf{H}^{\top}+\boldsymbol{\Sigma}_i.
+\end{equation}
+The squared Mahalanobis distance is
+\begin{equation}
+d_{ki}^{2}=\mathbf{r}_{ki}^{\top}\mathbf{S}_{ki}^{-1}\mathbf{r}_{ki}.
+\end{equation}
+Pairs satisfying $d_{ki}^{2}\leq\chi^2_{3,0.95}$ are retained and a one-to-one assignment is obtained with the Hungarian algorithm. The confidence level, process noise, confirmation length, and retention period are fixed system parameters shared across datasets. Thus, the method avoids scene-specific Euclidean distance threshold tuning but is not described as parameter-free.
+
+When multiple cameras assign observations to the same track at the same time, they are fused using inverse-covariance weighting:
+\begin{equation}
+\bar{\boldsymbol{\Sigma}}=\left(\sum_i\boldsymbol{\Sigma}_i^{-1}\right)^{-1},\qquad
+\bar{\mathbf{z}}=\bar{\boldsymbol{\Sigma}}\sum_i\boldsymbol{\Sigma}_i^{-1}\mathbf{z}_i.
+\end{equation}
+The fused observation and covariance are then used for the Kalman update.
+
+\subsection{Motion-Gated Tracklet Re-Linking}
+The conservative online gate avoids erroneous merges but can fragment a true identity after prolonged occlusion or missed detection. A post-tracking re-linking stage considers terminated and subsequently initialized tracklets only when they share the same class, do not overlap temporally, and are separated by less than a fixed maximum gap. The terminal state of the earlier tracklet is propagated to the start time of the later tracklet using the same constant-velocity model. Compatibility is evaluated by the covariance-normalized distance
+\begin{equation}
+d_{\mathrm{link}}^2=(\mathbf{p}^{+}-\hat{\mathbf{p}}^{-})^{\top}(\mathbf{P}^{-}+\mathbf{P}^{+})^{-1}(\mathbf{p}^{+}-\hat{\mathbf{p}}^{-}).
+\end{equation}
+Pairs satisfying the same $\chi^2$ criterion are matched one-to-one with the Hungarian algorithm. Re-linking recovers fragmentation without relaxing the online gate or introducing a site-specific Euclidean radius.
+
+\subsection{Safety-Relevant Trajectory Outputs}
+Each confirmed global track stores time, position, velocity, covariance, and object class. Pairwise distance is calculated between representative ground-contact anchors in the metric world frame. Distances to polygonal or three-dimensional hazard regions are computed directly from the reconstructed trajectories. These outputs provide a geometric basis for safety analysis; they do not by themselves constitute a complete warning policy, which would additionally require equipment envelopes, speed, operational rules, and risk-dependent thresholds.
