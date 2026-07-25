@@ -1,0 +1,61 @@
+\documentclass[preprint,12pt,numbers]{elsarticle}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{threeparttable}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{array}
+
+\journal{Automation in Construction}
+
+\begin{document}
+\begin{frontmatter}
+
+\title{SAFE-3D: Site-Aligned Association and Fusion with Uncertainty Estimation for UAV-Referenced Multi-Camera Construction Safety Monitoring}
+
+\author[skku]{Sujin Jin}
+\author[skku]{Seunghee Park\corref{cor1}}
+\cortext[cor1]{Corresponding author.}
+\address[skku]{Department of Global Smart City, Sungkyunkwan University, Suwon, Republic of Korea}
+
+\begin{abstract}
+Two-dimensional detections from construction-site cameras are not directly comparable across viewpoints, and image-plane proximity is distorted by depth and perspective. This study proposes SAFE-3D, a UAV-referenced framework that converts worker and equipment detections from multiple fixed CCTV cameras into uncertainty-aware metric three-dimensional observations and global trajectories in a common site coordinate system. A UAV-reconstructed site map defines the world frame, each CCTV camera is registered through robust 2D--3D correspondence and perspective-$n$-point estimation, and detections are lifted into 3D using a representative ground-contact anchor and scale-corrected depth. Anisotropic observation covariances encode depth- and viewpoint-dependent uncertainty and are used consistently for multi-view fusion, Mahalanobis gating, Kalman filtering, and motion-gated tracklet re-linking. Across four complementary datasets, CCTV-to-map registration achieved a mean reprojection error of 4.6 pixels. Leave-one-out validation against ten total-station-measured worker locations yielded a 3D RMS error of 1.270 m. Localization ablation reduced reprojection error from 53.0 to 12.9 pixels through the successive use of the ground-contact anchor, metric scale correction, and covariance-aware fusion. The latest association configuration achieved an IDF1 of 0.845 and a HOTA score of 0.807 without scene-specific Euclidean distance threshold tuning, outperforming fixed-distance baselines with IDF1 scores of 0.424--0.473. On an operating construction site, worker and equipment IDF1 scores were 0.67 and 0.76, respectively. Image-plane proximity cues remained camera dependent, with AUC values of 0.770 and 0.629, and 24.6\% of visually close pairs in one camera lying outside the corresponding 3D proximity threshold. These results show that SAFE-3D extends existing CCTV infrastructure from view-specific tracking to metric, site-coordinate 3D safety monitoring.
+\end{abstract}
+
+\begin{keyword}
+Construction safety \sep Multi-camera tracking \sep UAV mapping \sep 3D localization \sep Uncertainty-aware association \sep CCTV
+\end{keyword}
+
+\end{frontmatter}
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_method}
+\input{sections/04_results}
+\input{sections/05_discussion}
+\input{sections/06_conclusion}
+
+\section*{Acknowledgements}
+Funding information will be inserted after confirmation of the applicable National Research Foundation of Korea grant number.
+
+\section*{CRediT authorship contribution statement}
+\textbf{Sujin Jin}: Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Visualization, Writing--original draft. \textbf{Seunghee Park}: Conceptualization, Supervision, Project administration, Funding acquisition, Writing--review and editing.
+
+\section*{Declaration of competing interest}
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Data availability}
+The data that support the findings of this study are subject to construction-site access and privacy restrictions. Derived evaluation annotations and implementation details may be made available from the corresponding author upon reasonable request, subject to approval by the relevant site stakeholders.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{refs}
+
+\end{document}
