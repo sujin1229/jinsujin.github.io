@@ -1,0 +1,39 @@
+\section{Related Work}
+\label{sec:related_work}
+
+\subsection{Vision-Based Construction Safety Monitoring}
+Computer vision has been widely investigated as a non-contact complement to manual construction-safety inspection. Previous studies have reviewed object detection, posture estimation, activity analysis, and behavior-based safety monitoring in construction environments. Subsequent work has addressed hardhat non-compliance, safety-harness verification, personal protective equipment classification, and worker re-identification. These studies demonstrate that safety-relevant semantics can be extracted from site imagery. Their outputs, however, are generally image-level detections, classifications, behavioral labels, or camera-specific tracks rather than continuous trajectories in a common metric site coordinate system.
+
+\subsection{Sensor-Based Localization of Construction Resources}
+RFID, UWB, GPS/GNSS, and BLE have been applied to worker--equipment proximity monitoring and construction-resource localization. Sensor-based systems directly measure position and can maintain a unique identity for each instrumented resource. Their practical limitations include device installation, calibration, power management, communication coverage, maintenance, and retrieval. In addition, positional measurements alone do not describe PPE status or visual work context. These limitations motivate vision-based localization methods that can provide both semantic and spatial information without instrumenting every tracked entity.
+
+\subsection{Multi-Camera Worker and Equipment Tracking}
+Early construction studies tracked workers within individual views or detected workers and equipment from site video streams. Detector--tracker pipelines subsequently became common, but similar PPE, occlusion, missed detections, and abrupt viewpoint changes continue to cause trajectory fragmentation and identity switches. Pose-assisted re-identification has improved discrimination among workers wearing visually similar clothing. Construction-specific multi-camera studies have matched earthmoving equipment across non-overlapping cameras, accumulated PPE-compliance records across views, and combined appearance, location, and motion cues through message passing. These methods advance cross-camera identity continuity, but they generally do not represent every observation as a metric 3D position with an associated localization covariance in a shared site frame.
+
+\subsection{Geometry-Based Association and Spatial Registration}
+General multi-camera tracking research has used homographies, space--time--view graphs, lifted multicut formulations, and ground-coordinate Kalman filters to exploit geometric consistency. These studies show that geometry and uncertainty can resolve ambiguities that image-plane overlap or appearance features alone cannot. However, planar homographies assume that relevant objects can be represented on a common plane and often require manually selected correspondences for each camera. Such assumptions are restrictive in sites containing slopes, level changes, uneven terrain, temporary structures, and evolving work zones.
+
+Within construction research, BIM and UAV mapping have been used to provide spatial context for camera observations. BIM-integrated approaches visualize detected workers in three-dimensional models, while UAV photogrammetry provides metric site reconstruction and supports spatial analysis. Ground-to-aerial localization methods register ground imagery to aerial references to estimate camera pose. Nevertheless, BIM-integrated monitoring commonly depends on an available model and limited camera configurations, whereas UAV mapping and cross-view localization mainly focus on map generation or camera localization. A unified framework that uses a UAV-derived metric site map as the common reference for multiple fixed CCTV cameras and propagates localization uncertainty through global association remains underdeveloped.
+
+\subsection{Research Gap and Positioning}
+SAFE-3D treats spatial localization and identity association as a single geometrically consistent tracking problem. The UAV-derived site map provides a common metric frame; camera-specific observations are lifted into 3D with uncertainty; and the same covariance representation supports fusion, statistical gating, trajectory estimation, and tracklet re-linking. This design differs from methods that perform appearance-based cross-camera matching first and attach spatial information afterward. It also differs from planar surveillance formulations by retaining full 3D site coordinates suitable for construction-safety distance analysis.
+
+\begin{table*}[t]
+\centering
+\caption{Functional comparison of representative approaches and SAFE-3D.}
+\label{tab:related_comparison}
+\begin{tabular}{lccccc}
+\toprule
+Approach & Continuous tracking & Cross-camera association & Metric site frame & Explicit uncertainty & Safety output \\
+\midrule
+Pose-assisted ReID & Yes & No & No & No & Partial \\
+ReID + PPE monitoring & Yes & Yes & No & No & Yes \\
+Multi-camera equipment monitoring & Yes & Yes & No & No & No \\
+BIM + computer vision & Yes & No & Yes & No & Yes \\
+Message-passing worker tracking & Yes & Yes & No & No & Partial \\
+Lifted geometric multi-camera tracking & Yes & Yes & Partial & No & No \\
+Ground-coordinate uncertainty tracking & Yes & No & Partial & Yes & No \\
+\textbf{SAFE-3D} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} \\
+\bottomrule
+\end{tabular}
+\end{table*}
