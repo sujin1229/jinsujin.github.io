@@ -1,0 +1,6 @@
+Highlights
+
+- A UAV-derived 3D map unifies fixed CCTV observations in a metric site frame.
+- Ground-contact lifting and uncertainty-aware fusion improve 3D localization.
+- Statistical association avoids scene-specific Euclidean radius retuning.
+- Metric trajectories support worker-equipment and restricted-zone analysis.
