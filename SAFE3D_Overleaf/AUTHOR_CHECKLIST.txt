@@ -1,0 +1,45 @@
+SAFE-3D AUTHOR CHECKLIST BEFORE SUBMISSION
+
+NUMERICAL CONSISTENCY
+1. Confirm that IDF1=0.845 and HOTA=0.807 originate from the same latest Dataset A run.
+2. Add Pair-F1, IDSW, and reconstructed-ID counts only if they come from that same run.
+3. Confirm whether Dataset B association metrics are final measured values. They are not used in the principal table unless verified.
+4. Confirm Dataset D class-specific metrics before adding them. Only the measured overall Pair-F1=0.452 is retained in the narrative.
+5. Confirm trajectory coverage=80.9% and define its denominator.
+
+DATASET / APPENDIX DETAILS
+6. Report total UAV images acquired for Dataset B, why 80 were sampled, and the sampling rule.
+7. Report frame counts, frame rates, synchronization method, camera heights, focal settings, and evaluation intervals for all datasets.
+8. Report Dataset C and D annotation protocol and identity-count definitions.
+9. Confirm the exact number and identities of workers/equipment in Dataset D sessions.
+
+METRIC SCALE / SURVEY
+10. Add the four ArUco-marker pairs, physical separations, measurement instrument, and individual reconstruction errors.
+11. Describe the custom cuboid marker used in Dataset B and place its design in the Appendix.
+12. Clarify whether the ten total-station points represent one worker at ten positions or multiple workers/positions.
+13. Keep 0.776 m as in-sample alignment residual and 1.270 m as the primary leave-one-out validation error.
+
+METHOD REPRODUCIBILITY
+14. Insert the final fixed values for alpha_g, process noise, confirmation length, retention length, maximum re-linking gap, and synchronization tolerance.
+15. Confirm whether the association assignment is camera-wise or global per synchronized time step.
+16. Verify the exact covariance model and all uncertainty terms against the implementation.
+17. Confirm the re-linking implementation and remove any sentence that exceeds what the code actually does.
+
+BASELINES
+18. Keep the appearance-ReID baseline only if it was actually run with a named pretrained model and identical detections/tracking conditions.
+19. State the fixed radii used by the deployable Euclidean baselines and explain how they were selected without GT.
+20. Keep the GT-tuned Euclidean result clearly labeled as an oracle reference.
+
+FIGURES
+21. Create the full end-to-end Dataset B figure with UAV map, CCTV frustums, 3D observations, and trajectories.
+22. Ensure the Dataset C field figure uses Dataset C trajectories, not Dataset A placeholders.
+23. Add a worker and equipment detection failure panel.
+24. Add radius-sweep results only if the underlying run log is final.
+25. Use GCA consistently; avoid calling it a directly detected footpoint.
+
+ETHICS / ADMINISTRATION
+26. Confirm construction-company permission, privacy handling, and whether IRB review/exemption applies.
+27. Insert the exact NRF funding statement and grant number.
+28. Confirm corresponding-author email and affiliation wording.
+29. Verify all bibliography entries, especially recent 2025-2026 papers and VGGT.
+30. Add figures and citations before submission; the current package focuses on logical and linguistic reconstruction.
